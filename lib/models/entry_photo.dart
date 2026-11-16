@@ -7,7 +7,7 @@ class EntryPhoto {
   const EntryPhoto({
     required this.id,
     required this.relativePath,
-    this.entryId = '',
+    this.entryId = "",
     this.position = 0,
   });
 
@@ -27,19 +27,19 @@ class EntryPhoto {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'entry_id': entryId,
-      'relative_path': relativePath,
-      'position': position,
+      "id": id,
+      "entry_id": entryId,
+      "relative_path": relativePath,
+      "position": position,
     };
   }
 
   static EntryPhoto fromMap(Map<String, dynamic> map) {
     return EntryPhoto(
-      id: map['id'] as String,
-      entryId: (map['entry_id'] as String?) ?? '',
-      relativePath: map['relative_path'] as String,
-      position: (map['position'] as int?) ?? 0,
+      id: map["id"] as String,
+      entryId: (map["entry_id"] as String?) ?? "",
+      relativePath: map["relative_path"] as String,
+      position: (map["position"] as int?) ?? 0,
     );
   }
 

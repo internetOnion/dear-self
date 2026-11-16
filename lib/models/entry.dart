@@ -1,5 +1,7 @@
-import 'entry_photo.dart';
-import 'mood.dart';
+import "package:dear_self/models/timestamp.dart";
+
+import "entry_photo.dart";
+import "mood.dart";
 
 class Entry {
   final String id;
@@ -19,25 +21,12 @@ class Entry {
     required this.body,
     this.mood,
     required this.sceneId,
-    required this.createdAt,
-    required this.updatedAt,
+    required DateTime createdAt,
+    required DateTime updatedAt,
     List<EntryPhoto> photos = const [],
-  }) : photos = List.unmodifiable(photos);
-
-  String get displayTitle {
-    if (title.trim().isNotEmpty) {
-      return title.trim();
-    }
-
-    final lines = body.split('\n');
-    for (final line in lines) {
-      if (line.trim().isNotEmpty) {
-        return line.trim();
-      }
-    }
-
-    return '';
-  }
+  }) : photos = List.unmodifiable(photos),
+       createdAt = normalizeTimestamp(createdAt),
+       updatedAt = normalizeTimestamp(updatedAt);
 
   Entry copyWith({
     String? id,
@@ -66,14 +55,14 @@ class Entry {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'journal_id': journalId,
-      'title': title,
-      'body': body,
-      'mood': mood?.name,
-      'scene_id': sceneId,
-      'created_at': createdAt.toUtc().millisecondsSinceEpoch,
-      'updated_at': updatedAt.toUtc().millisecondsSinceEpoch,
+      "id": id,
+      "journal_id": journalId,
+      "title": title,
+      "body": body,
+      "mood": mood?.name,
+      "scene_id": sceneId,
+      "created_at": createdAt.toUtc().millisecondsSinceEpoch,
+      "updated_at": updatedAt.toUtc().millisecondsSinceEpoch,
     };
   }
 
@@ -81,20 +70,20 @@ class Entry {
     Map<String, dynamic> map, [
     List<EntryPhoto> photos = const [],
   ]) {
-    final moodName = map['mood'] as String?;
+    final moodName = map["mood"] as String?;
     return Entry(
-      id: map['id'] as String,
-      journalId: map['journal_id'] as String,
-      title: (map['title'] as String?) ?? '',
-      body: (map['body'] as String?) ?? '',
+      id: map["id"] as String,
+      journalId: map["journal_id"] as String,
+      title: (map["title"] as String?) ?? "",
+      body: (map["body"] as String?) ?? "",
       mood: moodName != null ? Mood.values.byName(moodName) : null,
-      sceneId: map['scene_id'] as String,
+      sceneId: map["scene_id"] as String,
       createdAt: DateTime.fromMillisecondsSinceEpoch(
-        map['created_at'] as int,
+        map["created_at"] as int,
         isUtc: true,
       ),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(
-        map['updated_at'] as int,
+        map["updated_at"] as int,
         isUtc: true,
       ),
       photos: photos,
@@ -123,14 +112,14 @@ class Entry {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        journalId,
-        title,
-        body,
-        mood,
-        sceneId,
-        createdAt,
-        updatedAt,
-        Object.hashAll(photos),
-      );
+    id,
+    journalId,
+    title,
+    body,
+    mood,
+    sceneId,
+    createdAt,
+    updatedAt,
+    Object.hashAll(photos),
+  );
 }
