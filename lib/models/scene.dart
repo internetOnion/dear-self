@@ -1,9 +1,6 @@
-import 'mood.dart';
+import "mood.dart";
 
-enum TextTone {
-  light,
-  dark,
-}
+enum TextTone { light, dark }
 
 class Scene {
   final String id;
@@ -23,10 +20,10 @@ class Scene {
   });
 
   static const Scene fallback = Scene(
-    id: 'default',
-    name: 'Quiet Space',
-    imageAsset: '',
-    prompt: 'What is on your mind today?',
+    id: "default",
+    name: "Quiet Space",
+    imageAsset: "",
+    prompt: "What is on your mind today?",
     moods: {},
     textTone: TextTone.dark,
   );
@@ -46,11 +43,11 @@ class Scene {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        name,
-        imageAsset,
-        prompt,
-        textTone,
-        Object.hashAllUnordered(moods),
-      );
+    id,
+    name,
+    imageAsset,
+    prompt,
+    textTone,
+    Object.hashAllUnordered(moods),
+  );
 }
