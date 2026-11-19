@@ -4,19 +4,6 @@ import "package:dear_self/models/mood.dart";
 import "package:dear_self/services/memory_storage.dart";
 import "package:uuid/uuid.dart";
 
-enum EntryError {
-  blank,
-  titleTooLong,
-  tooManyPhotos,
-  journalNotFound,
-}
-
-class EntryException implements Exception {
-  final EntryError error;
-
-  const EntryException(this.error);
-}
-
 class EntryService {
   final MemoryStorage _storage;
   final DateTime Function() _clock;
@@ -27,7 +14,7 @@ class EntryService {
   EntryService(this._storage, {DateTime Function()? clock})
     : _clock = clock ?? DateTime.now;
 
-  static bool canSave(String title, String body) {
+  bool _canSave(String title, String body) {
     return title.trim().isNotEmpty || body.trim().isNotEmpty;
   }
 
@@ -45,6 +32,7 @@ class EntryService {
         result.add(entry);
       }
     }
+
     return result;
   }
 
@@ -66,6 +54,7 @@ class EntryService {
     if (entries.isEmpty) {
       return null;
     }
+
     return entries.first;
   }
 
@@ -77,7 +66,7 @@ class EntryService {
     required String sceneId,
     List<EntryPhoto> photos = const [],
   }) {
-    _validate(
+    _validateEntry(
       journalId: journalId,
       title: title,
       body: body,
@@ -102,7 +91,7 @@ class EntryService {
   }
 
   Entry update(Entry entry) {
-    _validate(
+    _validateEntry(
       journalId: entry.journalId,
       title: entry.title,
       body: entry.body,
@@ -123,24 +112,23 @@ class EntryService {
     _storage.deleteEntry(id);
   }
 
-  void _validate({
+  void _validateEntry({
     required String journalId,
     required String title,
     required String body,
     required List<EntryPhoto> photos,
   }) {
-    if (!canSave(title, body)) {
-      throw const EntryException(EntryError.blank);
+    if (_storage.getJournal(journalId) == null) {
+      throw StateError("Journal not found: $journalId");
+    }
+    if (!_canSave(title, body)) {
+      throw ArgumentError("Entry must have a title or body");
     }
     if (title.length > maxTitleLength) {
-      throw const EntryException(EntryError.titleTooLong);
+      throw ArgumentError("Title must be at most $maxTitleLength characters");
     }
     if (photos.length > maxPhotos) {
-      throw const EntryException(EntryError.tooManyPhotos);
-    }
-    if (_storage.getJournal(journalId) == null) {
-      throw const EntryException(EntryError.journalNotFound);
+      throw ArgumentError("An entry can have at most $maxPhotos photos");
     }
   }
 }
-

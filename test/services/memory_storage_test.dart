@@ -73,7 +73,6 @@ void main() {
     });
 
     test("getEntries is newest first", () {
-      // Saved in mixed order so insertion order can't pass by accident.
       storage.saveEntry(
         makeEntry(id: "middle", createdAt: DateTime.utc(2026, 1, 2)),
       );
