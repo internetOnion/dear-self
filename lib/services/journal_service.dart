@@ -2,22 +2,6 @@ import "package:dear_self/models/journal.dart";
 import "package:dear_self/services/memory_storage.dart";
 import "package:uuid/uuid.dart";
 
-enum JournalNameError {
-  empty,
-  tooLong,
-  duplicate,
-}
-
-class JournalNameException implements Exception {
-  final JournalNameError error;
-
-  const JournalNameException(this.error);
-}
-
-class LastJournalException implements Exception {
-  const LastJournalException();
-}
-
 class JournalService {
   final MemoryStorage _storage;
   final DateTime Function() _clock;
@@ -28,18 +12,16 @@ class JournalService {
   JournalService(this._storage, {DateTime Function()? clock})
     : _clock = clock ?? DateTime.now;
 
-  static JournalNameError? validateName(
-    String name,
-    List<Journal> existing, {
-    String? exceptId,
-  }) {
+  void _validateName(String name, List<Journal> existing, {String? exceptId}) {
     final trimmed = name.trim();
 
     if (trimmed.isEmpty) {
-      return JournalNameError.empty;
+      throw ArgumentError("Journal name cannot be empty");
     }
     if (trimmed.length > maxNameLength) {
-      return JournalNameError.tooLong;
+      throw ArgumentError(
+        "Journal name must be at most $maxNameLength characters",
+      );
     }
 
     for (final journal in existing) {
@@ -47,11 +29,9 @@ class JournalService {
         continue;
       }
       if (journal.name.toLowerCase() == trimmed.toLowerCase()) {
-        return JournalNameError.duplicate;
+        throw ArgumentError('A journal named "$trimmed" already exists');
       }
     }
-
-    return null;
   }
 
   List<Journal> getAll() {
@@ -59,10 +39,7 @@ class JournalService {
   }
 
   Journal create(String name) {
-    final error = validateName(name, _storage.getJournals());
-    if (error != null) {
-      throw JournalNameException(error);
-    }
+    _validateName(name, _storage.getJournals());
 
     final journal = Journal(
       id: const Uuid().v4(),
@@ -75,22 +52,16 @@ class JournalService {
   }
 
   Journal rename(String id, String newName) {
-    final error = validateName(
-      newName,
-      _storage.getJournals(),
-      exceptId: id,
-    );
-    if (error != null) {
-      throw JournalNameException(error);
-    }
-
     final existing = _storage.getJournal(id);
     if (existing == null) {
       throw StateError("Journal not found: $id");
     }
 
+    _validateName(newName, _storage.getJournals(), exceptId: id);
+
     final updated = existing.copyWith(name: newName.trim());
     _storage.saveJournal(updated);
+
     return updated;
   }
 
@@ -101,10 +72,9 @@ class JournalService {
   void delete(String id) {
     final journals = _storage.getJournals();
     if (journals.length <= 1 && _storage.getJournal(id) != null) {
-      throw const LastJournalException();
+      throw StateError("Cannot delete the last journal");
     }
 
     _storage.deleteJournal(id);
   }
 }
-
